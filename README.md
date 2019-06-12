@@ -1,12 +1,12 @@
 # Python Crawler
 ## Top Interview
-[2.Checking IP Address](#2checking IP address)  
-[3.mimic: user-agent and proxy IP address](#3.mimic: user-agent and proxy IP address)  
-[4.get all IPO companies from 2010 to 2018 via NASDAQ](#4.get all IPO companies from 2010 to 2018 via NASDAQ)  
-[5.spliting](#5.spliting)  
-[6.fetch data from S-1 form SEC](#6.fetch data from S-1 form SEC) 
-[7.fetch P/E ratio from yahoo and NASDAQ](#7.fetch P/E ratio from yahoo and NASDAQ) 
-[8.get current stock price](#8.get current stock price) 
+[2-Checking-IP-Address](#2checking IP address)  
+[3-mimic: user-agent-and-proxy-IP-address](#3.mimic: user-agent and proxy IP address)  
+[4-get-all-IPO-companies-from-2010-to-2018-via-NASDAQ](#4.get all IPO companies from 2010 to 2018 via NASDAQ)  
+[5-spliting](#5.spliting)  
+[6-fetch-data-from-S-1-form-SEC](#6.fetch data from S-1 form SEC) 
+[7-fetch-P/E-ratio-from-yahoo-and-NASDAQ](#7.fetch P/E ratio from yahoo and NASDAQ) 
+[8-get-current-stock-price](#8.get current stock price) 
 ### 2.Checking IP Address
 get host name and check IP address
 ```python
