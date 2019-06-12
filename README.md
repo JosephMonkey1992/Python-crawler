@@ -1,7 +1,17 @@
+# Python Crawler
+## Top Interview
+[2.Checking IP Address](#2checking IP address)  
+[3.mimic: user-agent and proxy IP address](#3.mimic: user-agent and proxy IP address)  
+[4.get all IPO companies from 2010 to 2018 via NASDAQ](#4.get all IPO companies from 2010 to 2018 via NASDAQ)  
+[5.spliting](#5.spliting)  
+[6.fetch data from S-1 form SEC](#6.fetch data from S-1 form SEC) 
+[7.fetch P/E ratio from yahoo and NASDAQ](#7.fetch P/E ratio from yahoo and NASDAQ) 
+[8.get current stock price](#8.get current stock price) 
+### 2.Checking IP Address
+get host name and check IP address
+```python
 import socket
-## get host name
 socket.gethostname() 
-## check my IP address
 def get_host_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -11,9 +21,12 @@ def get_host_ip():
         s.close()
     return ip
 print(get_host_ip())
-
-import urllib ##Basic use 
-from bs4 import BeautifulSoup ##polishing html codes
+```
+### 3.mimic: user-agent and proxy IP address
+import necessary packages->find proxy IP Address->add user agent->try decode the street.com
+```python
+import urllib
+from bs4 import BeautifulSoup
 from urllib import request
 from urllib import parse
 from urllib.request import urlopen
@@ -27,7 +40,6 @@ import string
 import random
 import socket
 import http.cookiejar
-
 ##The IP agent which is obtained from agent website. Besides, we can purchase from T-Mall.
 proxy_list={
     'http':'157.230.220.233:8080',   
@@ -41,8 +53,7 @@ proxy_list={
     'http':'157.230.232.130:8080',
     'http':'206.189.231.239:8080',
     'http':'104.248.7.88:3128'
-            }
-            
+            }           
 ##example of how we use headers, to mimic human searching avoid being detected as machine.
 url100='https://www.thestreet.com/quote/SCTY.html'
 req100=urllib.request.Request(url100)
@@ -51,10 +62,10 @@ html100=urllib.request.urlopen(req100,timeout=500).read()
 html100 = bytes.decode(html100,encoding="utf-8")
 print(html100)
 ##without the headers we cannot get into TheStreet website. However,for Sec and Nasdaq dont worry about that.
-
-##Part I:
-##Search from 2010 to 2018 from Nasdaq, and get all the IPO companies` information including the symbol, CIK, company name, business address, Tel-num, issue price, outstanding shares etc.
-
+```
+### 4.get all IPO companies from 2010 to 2018 via NASDAQ
+create a year-month list->get href->fetch target informaton->print->restore in csv
+```python
 ##creating an url list, which can help us to open hundreds of web pages to search for IPO companies from 2010 to 2018. 
 y=['2010','2011','2012','2013','2014','2015','2016','2017','2018']
 m=['01','02','03','04','05','06','07','08','09','10','11','12']
@@ -122,7 +133,6 @@ print(shareoutstanding_list)
 print(CIK_list)
 print(years_list)
 print(symbol_list)
-
 ##write a csv.file to record the results.
 with open('information-final.csv','w') as f:
     f_csv = csv.writer(f)
@@ -135,10 +145,10 @@ with open('information-final.csv','w') as f:
     f_csv.writerow(CIK_list)
     f_csv.writerow(years_list)
     f_csv.writerow(symbol_list)
-
-##Part II:
-##Select the industry types we need:Technology, Telecom, Media and Biotech.
-
+```
+### 5.spliting 
+create two lists->split and refine
+```python
 symbol_list=list()
 for item2 in url_list:
     req = urllib.request.urlopen(item2).read()
@@ -148,8 +158,7 @@ for item2 in url_list:
         a=anchor2['href']
         if('https://www.nasdaq.com/symbol/' in a):
             smb=a
-            symbol_list.append(smb)
-            
+            symbol_list.append(smb)           
 Technology_list=list()
 for s in symbol_list:
     page2 = urllib.request.urlopen(s).read()
@@ -159,11 +168,9 @@ for s in symbol_list:
         h=an['href']
         if('https://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Technology'in h):
             select1=s
-            Technology_list.append(select1)
-            
+            Technology_list.append(select1)           
 ##check the tech list.
 print(Technology_list)
-
 Healthcare_list=list()
 for v in symbol_list:
     page3 = urllib.request.urlopen(v).read()
@@ -173,52 +180,44 @@ for v in symbol_list:
         g=anc['href']
         if('https://www.nasdaq.com/screening/companies-by-industry.aspx?industry=Health%2bCare'in g):
             select2=v
-            Healthcare_list.append(select2)
-            
+            Healthcare_list.append(select2)            
 ##check the health list
 print(Healthcare_list)
-
-## spliting the necessary word:
+##spliting the necessary word:
 fin1_list=list()
 for t in range(len(Technology_list)):
     res1=Technology_list[t].split('/') ##get the symbol
     fin1=res1[len(res1)-1]    
-    fin1_list.append(fin1)
-    
+    fin1_list.append(fin1) 
 print(fin1_list)
-
 fin2_list=list()
 for j in range(len(Healthcare_list)):
     res2=Healthcare_list[j].split('/')
     fin2=res2[len(res2)-1]
-    fin2_list.append(fin2)
-    
+    fin2_list.append(fin2)  
 print(fin2_list)
-
+##store into csv
 with open('Technology.csv','w') as f:
     f_csv = csv.writer(f)
     f_csv.writerow(fin1_list)
-    f_csv.writerow(Technology_list)
-    
+    f_csv.writerow(Technology_list)   
 with open('Healthcare.csv','w') as f:
     f_csv = csv.writer(f)
     f_csv.writerow(fin2_list)
     f_csv.writerow(Healthcare_list)
-    
-##Part III:
-##Get stock option price from S-1 form in SEC, and hen determine the lowball priced stock option group.
-
+```  
+### 6.fetch data from S-1 form SEC
+important to prunedd and use dictionary
+```python
 url_list=list()
 with open('CIKlist.csv', newline='', encoding='UTF-8') as csvfile:
     reader=csv.reader(csvfile)
     for p in reader:
-        u=str(p) ##we need to makee those string
+        u=str(p) ##we need to make those into string
         prunedd=u.strip(string.punctuation) ##sttrip all the unnecessary pounctuation.like ''.
         url='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=000'+prunedd+'&type=S-1&dateb=&owner=exclude&count=40'
-        url_list.append(url)
-        
+        url_list.append(url)      
 print(url_list)
-
 page_list=list()
 for item in url_list:
     response5=urllib.request.urlopen(item)
@@ -230,17 +229,13 @@ for item in url_list:
             tdn=td[i+1]
             for ah in tdn.find_all('a'):
                 page=ah['href']
-                page_list.append(page)
-                
+                page_list.append(page)              
 print(page_list)
-
 url_list2=list()
 for m in page_list:
     pa='https://www.sec.gov'+m
-    url_list2.append(pa)
-    
+    url_list2.append(pa)    
 print(url_list2)
-
 page1_list=list()
 for h in url_list2:
     response6=urllib.request.urlopen(h)
@@ -252,33 +247,27 @@ for h in url_list2:
             tdn1=td1[g+2]
             for ah1 in tdn1.find_all('a'):
                 page1=ah1['href']
-                page1_list.append(page1)
-                
+                page1_list.append(page1)              
 print(page1_list)
-
 url_list3=list()
 for n in page1_list:
     paa='https://www.sec.gov'+n
-    url_list3.append(paa)
-    
+    url_list3.append(paa)    
 print(url_list3)
-
 with open('urlsecondlevel.csv','w') as wow: ##We need to store the temporate results, because the next step the machine is gonna visit thousands of time.Not necessary if you have 4 hours seating infront of computer.
     wow_csv = csv.writer(wow)
     wow_csv.writerow(url_list3)
-
 ##The urlsecondlevel.csv carries the same data with Level.csv.
+##Create dictionary
 dic={}
 with open('Level.csv', newline='', encoding='UTF-8') as woww:
     readerw=csv.DictReader(woww)
     for row in readerw:
         dic[row['\ufeffCIK']]=row['URLF']
-
 ##applying for dict to match each CIK and URL, because it contains dupicated url previously.
 for k,v in dic.items(): 
     print(k)
-    print(v)
-    
+    print(v) 
 stockoption_list=list()
 CIKlist=list()
 for k,v in dic.items():
@@ -294,22 +283,20 @@ for k,v in dic.items():
                 pass
             stockoption_list.append(tdn7)
             CIKlist.append(k)
-
 with open('NEWstockoption.csv', 'w', encoding='utf-8') as file:
     stock=csv.writer(file)
     stock.writerow(stockoption_list)
     stock.writerow(CIKlist)
-    
-##Part IV:
-##Fetching PE ration, Forward PE ration, EPS from Nasdaq, Yahoo and The street.
-
+```
+### 7.fetch P/E ratio from yahoo and NASDAQ
+when dealing with bundle of data, try to store the temporary results.
+```python
 dic={}
 with open('selected.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         dic[row['ï»¿Name']]=row['symbolurl']
-        print(row)
-        
+        print(row)     
 PEr_list=list()
 CIKlist=list()
 for k,v in dic.items(): 
@@ -324,15 +311,12 @@ for k,v in dic.items():
                     if('Forward P/E (1y)' in td_txt):
                         spanr=td[i].get_text()
                         PEr_list.append(spanr)
-                        CIKlist.append(k)
-                        
+                        CIKlist.append(k)                      
 print(PEr_list)
-
 with open('PEPPratio.csv','w') as f:
     f_csv = csv.writer(f)
     f_csv.writerow(PEr_list)
-    f_csv.writerow(CIKlist)
-    
+    f_csv.writerow(CIKlist)   
 PEE_list=list()
 CIK_list=list()
 for k,v in dic.items(): 
@@ -347,30 +331,23 @@ for k,v in dic.items():
                     if('P/E Ratio' in td_txt):
                         span=td[i].get_text()
                         PEE_list.append(span)
-                        CIK_list.append(k)
-                        
+                        CIK_list.append(k)                      
 print(PEE_list)
-
 with open('PEEratio.csv','w') as ff:
     ff_csv = csv.writer(ff)
     ff_csv.writerow(PEE_list)
-    ff_csv.writerow(CIK_list)
-    
+    ff_csv.writerow(CIK_list)   
 ##some of the results from Nasdaq shows that some companies they have NE for both PE and Forward PE, so we decide to search the missing ones from Yahoo.
-
 dic={}
 with open('notincluded.csv', newline='', encoding='UTF-8') as toy: ##not included in Previous results but still be our targets.
     readertoy=csv.DictReader(toy)
     for row in readertoy:
-        dic[row['\ufeffSymbol']]=row['CIK']
-        
+        dic[row['\ufeffSymbol']]=row['CIK']     
 k_list=list()
 for k,v in dic.items():
     url3='https://finance.yahoo.com/quote/'+k+'?p='+k+'&.tsrc=fin-srch'
-    k_list.append(url3)
-    
+    k_list.append(url3) 
 print(k_list)
-
 CIK_list2=list()
 EPSlist2=list()
 name_list=list()
@@ -385,17 +362,16 @@ for k,v in dic.items():
                 eps=td1[x+1].get_text()
                 CIK_list2.append(v)
                 name_list.append(k)
-                EPSlist2.append(eps)
-                
+                EPSlist2.append(eps)              
 with open('yahooeps.csv','w') as yahoo:
     yahoo_csv = csv.writer(yahoo)
     yahoo_csv.writerow(name_list)
     yahoo_csv.writerow(CIK_list2)
     yahoo_csv.writerow(EPSlist2)
-    
-##Part V:
-##Get current stock prices, it could be updated timely.
-
+```
+### 8.get current stock price
+this version without timer
+```python
 def get_price(url1):
     with urlopen(url1) as text:
         soup = BeautifulSoup(text, 'html.parser')
@@ -412,14 +388,12 @@ def get_price(url1):
                                 pruned_txt=price.strip(string.punctuation)
                                 return pruned_txt # get rid of () $ punctuations
                         except IndexError:
-                             pass
-                             
+                             pass                          
 dic={}
 with open('Currentprice-Selectedgroup.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        dic[row['symbolname']]=row['symbolurl']
-        
+        dic[row['symbolname']]=row['symbolurl']      
 price_list=list()
 CIK_list=list()
 Time_list=list()
@@ -436,9 +410,10 @@ for k,v in dic.items():
     Time_list.append(T)
     print("CIK:", k)
     print("Localtime:", T)
-    print("Current Price:", rep3)
-    
+    print("Current Price:", rep3)  
+##store into csv by column
 with open('currentprice20190602.csv','w') as f:
     f_csv = csv.writer(f)
     for i in range(len(price_list)):
         f_csv.writerow([CIK_list[i], Time_list[i], price_list[i]])
+```
